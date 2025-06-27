@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "insurance-manager"
+version = "0.1.0"
+description = "Insurance Manager - Educational simulation game for insurance and risk management"
+authors = ["Insurance Manager Team"]
+readme = "README.md"
+python = "^3.12"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.104.0"
+sqlalchemy = "^2.0"
+pydantic = "^2.5"
+celery = "^5.3"
+redis = "^5.0"
+pandas = "^2.1"
+numpy = "^1.26"
+scipy = "^1.11"
+uvicorn = "^0.24.0"
+alembic = "^1.12"
+asyncpg = "^0.29"
+python-multipart = "^0.0.6"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4"
+pytest-asyncio = "^0.21"
+black = "^23.0"
+ruff = "^0.1"
+mypy = "^1.7"
+pre-commit = "^3.5"
+httpx = "^0.25"
+pytest-cov = "^4.1"
+faker = "^20.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true 
