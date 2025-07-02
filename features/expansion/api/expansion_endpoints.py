@@ -85,22 +85,71 @@ from api.auth_utils import get_current_company
 
 # Dependency to get game configuration
 async def get_expansion_config(
-    company: Company = Depends(get_current_company)
+    company: Company = Depends(get_current_company),
+    db: AsyncSession = Depends(get_db)
 ) -> dict:
-    """Get expansion configuration for the current semester.
+    """Get expansion configuration for the current semester."""
+    from core.models import Semester, SemesterConfiguration, GameConfiguration
     
-    TODO: Load from actual semester configuration
-    """
-    # For now, return default configuration
-    return {
-        "base_expansion_weeks": 4,
-        "distance_cost_per_mile": 100,
-        "market_size_cost_multiplier": 1.0,
-        "max_states_per_turn": 3,
-        "home_state_discount": 0.5,
-        "adjacent_state_discount": 0.2,
-        "same_region_discount": 0.1
-    }
+    # Get current semester
+    semester = await db.get(Semester, company.semester_id)
+    if not semester:
+        # Fall back to default configuration
+        return {
+            "base_expansion_weeks": 4,
+            "distance_cost_per_mile": 100,
+            "market_size_cost_multiplier": 1.0,
+            "max_states_per_turn": 3,
+            "home_state_discount": 0.5,
+            "adjacent_state_discount": 0.2,
+            "same_region_discount": 0.1
+        }
+    
+    # Get semester configuration
+    result = await db.execute(
+        select(SemesterConfiguration)
+        .where(SemesterConfiguration.semester_id == semester.id)
+    )
+    semester_config = result.scalar_one_or_none()
+    
+    # Get base game configuration
+    base_config_result = await db.execute(
+        select(GameConfiguration)
+        .where(GameConfiguration.is_active == True)
+        .order_by(GameConfiguration.version.desc())
+    )
+    base_config = base_config_result.scalar_one_or_none()
+    
+    if not base_config:
+        # Fall back to default if no configuration found
+        return {
+            "base_expansion_weeks": 4,
+            "distance_cost_per_mile": 100,
+            "market_size_cost_multiplier": 1.0,
+            "max_states_per_turn": 3,
+            "home_state_discount": 0.5,
+            "adjacent_state_discount": 0.2,
+            "same_region_discount": 0.1
+        }
+    
+    # Start with base expansion parameters
+    expansion_config = base_config.expansion_parameters.copy()
+    
+    # Apply semester overrides if they exist
+    if semester_config and semester_config.feature_overrides:
+        expansion_overrides = semester_config.feature_overrides.get("expansion_parameters", {})
+        expansion_config.update(expansion_overrides)
+    
+    # Ensure required keys exist with defaults
+    expansion_config.setdefault("base_expansion_weeks", 4)
+    expansion_config.setdefault("distance_cost_per_mile", 100)
+    expansion_config.setdefault("market_size_cost_multiplier", 1.0)
+    expansion_config.setdefault("max_states_per_turn", 3)
+    expansion_config.setdefault("home_state_discount", 0.5)
+    expansion_config.setdefault("adjacent_state_discount", 0.2)
+    expansion_config.setdefault("same_region_discount", 0.1)
+    
+    return expansion_config
 
 
 @router.get("/opportunities", response_model=List[ExpansionOpportunityResponse])

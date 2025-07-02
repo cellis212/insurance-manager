@@ -121,13 +121,8 @@ async def set_portfolio_preferences(
             detail="No active turn found"
         )
     
-    # Initialize portfolio manager
-    # TODO: Get config from proper source
-    config = {
-        'investment_parameters': {
-            'min_investment_amount': 1000000
-        }
-    }
+    # Initialize portfolio manager with proper configuration
+    config = await _get_investment_config(session, company.semester_id)
     portfolio_manager = PortfolioManager(config)
     
     try:
@@ -248,8 +243,8 @@ async def get_cfo_insights(
             performance_assessment=None
         )
     
-    # Initialize skill effects service
-    config = {}  # TODO: Get proper config
+    # Initialize skill effects service with proper configuration
+    config = await _get_investment_config(session, company.semester_id)
     skill_effects = InvestmentSkillEffects(config)
     
     # Prepare portfolio data
@@ -344,6 +339,81 @@ async def get_investment_constraints(
         }
     
     return constraints
+
+
+async def _get_investment_config(
+    session: AsyncSession,
+    semester_id: UUID
+) -> Dict[str, Any]:
+    """Get investment configuration for the current semester."""
+    from core.models import Semester, SemesterConfiguration, GameConfiguration
+    
+    # Get current semester
+    semester = await session.get(Semester, semester_id)
+    if not semester:
+        # Fall back to default configuration
+        return {
+            'investment_parameters': {
+                'min_investment_amount': 1000000,
+                'min_liquidity_ratio': 0.20,
+                'rebalancing_cost_rate': 0.001,
+                'skill_noise_range': {
+                    'novice': 0.30,
+                    'intermediate': 0.15,
+                    'expert': 0.05
+                }
+            }
+        }
+    
+    # Get semester configuration
+    result = await session.execute(
+        select(SemesterConfiguration)
+        .where(SemesterConfiguration.semester_id == semester.id)
+    )
+    semester_config = result.scalar_one_or_none()
+    
+    # Get base game configuration
+    base_config_result = await session.execute(
+        select(GameConfiguration)
+        .where(GameConfiguration.is_active == True)
+        .order_by(GameConfiguration.version.desc())
+    )
+    base_config = base_config_result.scalar_one_or_none()
+    
+    if not base_config:
+        # Fall back to default if no configuration found
+        return {
+            'investment_parameters': {
+                'min_investment_amount': 1000000,
+                'min_liquidity_ratio': 0.20,
+                'rebalancing_cost_rate': 0.001,
+                'skill_noise_range': {
+                    'novice': 0.30,
+                    'intermediate': 0.15,
+                    'expert': 0.05
+                }
+            }
+        }
+    
+    # Start with base investment parameters
+    investment_config = {'investment_parameters': base_config.investment_parameters.copy()}
+    
+    # Apply semester overrides if they exist
+    if semester_config and semester_config.feature_overrides:
+        investment_overrides = semester_config.feature_overrides.get("investment_parameters", {})
+        investment_config['investment_parameters'].update(investment_overrides)
+    
+    # Ensure required keys exist with defaults
+    investment_config['investment_parameters'].setdefault('min_investment_amount', 1000000)
+    investment_config['investment_parameters'].setdefault('min_liquidity_ratio', 0.20)
+    investment_config['investment_parameters'].setdefault('rebalancing_cost_rate', 0.001)
+    investment_config['investment_parameters'].setdefault('skill_noise_range', {
+        'novice': 0.30,
+        'intermediate': 0.15,
+        'expert': 0.05
+    })
+    
+    return investment_config
 
 
 async def _get_latest_portfolio(

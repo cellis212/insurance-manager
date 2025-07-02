@@ -382,14 +382,30 @@ async def fire_employee(
     }
 
 
+async def _get_current_turn_number(db: AsyncSession, semester_id: str) -> int:
+    """Helper function to get the current turn number from the database."""
+    from core.models.turn import Turn
+    from uuid import UUID
+    
+    result = await db.execute(
+        select(Turn.turn_number)
+        .where(Turn.semester_id == UUID(semester_id))
+        .where(Turn.status == "active")
+        .order_by(Turn.turn_number.desc())
+        .limit(1)
+    )
+    turn_number = result.scalar_one_or_none()
+    return turn_number or 1  # Default to turn 1 if no active turn
+
+
 @router.get("/hiring-pool", response_model=Dict[str, List[EmployeeCandidateResponse]])
 async def get_hiring_pool(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get the current week's available employee candidates."""
-    # Get current turn number (simplified - in real implementation, get from Turn table)
-    current_turn = 1  # TODO: Get actual turn number
+    # Get current turn number from the database
+    current_turn = await _get_current_turn_number(db, str(current_user.semester_id))
     
     # Generate hiring pool
     service = EmployeeHiringService()
@@ -462,7 +478,7 @@ async def hire_employee(
     service = EmployeeHiringService()
     await service.initialize({})
     
-    current_turn = 1  # TODO: Get actual turn
+    current_turn = await _get_current_turn_number(db, str(current_user.semester_id))
     hiring_pool = await service.generate_weekly_hiring_pool(
         session=db,
         semester_id=str(current_user.semester_id),
