@@ -258,14 +258,14 @@ class PluginManager:
         # Also check database feature flags
         result = await session.execute(
             select(FeatureFlag)
-            .where(FeatureFlag.flag_name.like("plugin.%"))
-            .where(FeatureFlag.is_enabled == True)
+            .where(FeatureFlag.feature_key.like("plugin.%"))
+            .where(FeatureFlag.enabled == True)
         )
         feature_flags = result.scalars().all()
         
         # Add plugins from feature flags
         for flag in feature_flags:
-            plugin_name = flag.flag_name.replace("plugin.", "")
+            plugin_name = flag.feature_key.replace("plugin.", "")
             if plugin_name in self._plugin_classes:
                 # Check if flag applies to this context
                 if await self._should_enable_plugin(flag, semester_id):
