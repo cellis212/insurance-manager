@@ -24,7 +24,7 @@ from api.auth_utils import (
     revoke_all_user_sessions,
     decode_token
 )
-from core.database import get_async_db
+from core.database import get_session
 from core.models.user import User
 from core.models.session import Session
 
@@ -97,7 +97,7 @@ class RefreshTokenRequest(BaseModel):
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserRegister,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> User:
     """Register a new user account.
     
@@ -141,7 +141,7 @@ async def register(
 async def login(
     user_data: UserLogin,
     request: Request,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Login with email and password.
     
@@ -206,7 +206,7 @@ async def login(
 @router.post("/logout")
 async def logout(
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Logout current user and revoke all sessions.
     
@@ -229,7 +229,7 @@ async def logout(
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
     token_data: RefreshTokenRequest,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Refresh authentication tokens using refresh token.
     
@@ -311,7 +311,7 @@ async def get_current_user_info(
 @router.get("/sessions", response_model=List[SessionResponse])
 async def get_user_sessions(
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[Session]:
     """Get all active sessions for current user.
     
@@ -336,7 +336,7 @@ async def get_user_sessions(
 async def revoke_specific_session(
     session_id: UUID,
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Revoke a specific session.
     
@@ -379,7 +379,7 @@ async def change_password(
     old_password: str,
     new_password: str = Field(..., min_length=8),
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Change user password.
     

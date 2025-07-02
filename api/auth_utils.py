@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
-from core.database import get_async_db
+from core.database import get_session
 from core.models.user import User
 from core.models.session import Session
 
@@ -120,7 +120,7 @@ def decode_token(token: str) -> Dict[str, Any]:
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> User:
     """Get the current authenticated user from JWT token.
     
@@ -317,7 +317,7 @@ async def clean_expired_sessions(db: AsyncSession) -> int:
 
 async def get_current_company(
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> "Company":
     """Get the current user's company for the active semester.
     

@@ -18,7 +18,7 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.auth_utils import get_current_active_user, get_current_company
-from core.database import get_async_db
+from core.database import get_session
 from core.models import (
     User, Company, Semester, Turn, CompanyTurnDecision, 
     CompanyTurnResult, CEO, Employee, Product,
@@ -112,7 +112,7 @@ class TurnResultsResponse(BaseModel):
 async def create_company(
     request: CreateCompanyRequest,
     current_user: User = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> CompanyResponse:
     """Create a new company with CEO for the current semester.
     
@@ -205,7 +205,7 @@ async def create_company(
 @router.get("/company", response_model=CompanyResponse)
 async def get_company_details(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> CompanyResponse:
     """Get current company details."""
     # Get CEO name
@@ -261,7 +261,7 @@ async def get_company_details(
 @router.get("/current-turn", response_model=TurnStatusResponse)
 async def get_current_turn_status(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> TurnStatusResponse:
     """Get current turn status and timing information."""
     # Get active turn
@@ -306,7 +306,7 @@ async def get_current_turn_status(
 async def submit_turn_decisions(
     decisions: TurnDecisionRequest,
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> Dict[str, Any]:
     """Submit decisions for the current turn.
     
@@ -388,7 +388,7 @@ async def submit_turn_decisions(
 @router.get("/decisions/current", response_model=Dict[str, Any])
 async def get_current_decisions(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> Dict[str, Any]:
     """Get decisions submitted for the current turn."""
     # Get current turn
@@ -435,7 +435,7 @@ async def get_current_decisions(
 async def get_turn_results(
     turn_id: UUID,
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> TurnResultsResponse:
     """Get results for a specific turn."""
     # Get turn to verify it belongs to company's semester
@@ -475,7 +475,7 @@ async def get_turn_results(
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_company_dashboard(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> DashboardResponse:
     """Get comprehensive dashboard data for the company."""
     # Get company details
@@ -558,7 +558,7 @@ async def get_company_dashboard(
 async def get_results_history(
     limit: int = 10,
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[Dict[str, Any]]:
     """Get historical turn results."""
     result = await db.execute(
@@ -586,7 +586,7 @@ async def get_results_history(
 
 @router.get("/lines-of-business", response_model=List[Dict[str, Any]])
 async def get_lines_of_business(
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[Dict[str, Any]]:
     """Get all available lines of business."""
     from core.models.line_of_business import LineOfBusiness

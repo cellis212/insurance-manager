@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_dev_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations/init:/docker-entrypoint-initdb.d
@@ -113,7 +113,7 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
-    command: celery -A core.engine.celery_app worker --loglevel=info
+    command: celery -A core.celery_app worker --loglevel=info
 
   # Celery beat for scheduled tasks
   celery-beat:
@@ -138,7 +138,7 @@ services:
         condition: service_healthy
       backend:
         condition: service_started
-    command: celery -A core.engine.celery_app beat --loglevel=info
+    command: celery -A core.celery_app beat --loglevel=info
 
   # Frontend Next.js service
   frontend:
