@@ -1,0 +1,146 @@
+# Spring 2024 Semester Configuration
+# MVP Configuration - Core features only
+
+version: "1.0"
+schema_version: 1
+
+semester:
+  code: "2024_SPRING"
+  name: "Spring 2024"
+  start_date: "2024-01-15"
+  end_date: "2024-05-15"
+  description: "RMI 3501: Insurance Company Management - Spring 2024"
+
+# Use default base configuration
+base_configuration:
+  name: "default"
+  version: 1
+
+# Game parameter overrides (minimal for MVP)
+game_parameters:
+  # Starting conditions
+  initial_values:
+    starting_capital: 5000000
+    home_state_discount: 0.5
+    initial_solvency_ratio: 3.0
+    
+  # Turn timing
+  turn:
+    turn_duration_days: 7
+    decision_deadline: "Sunday 23:59:59 EST"
+    processing_start: "Monday 00:00:00 EST"
+    late_submission_penalty: 0.05
+    
+  # Basic economic parameters
+  economic:
+    base_demand_multiplier: 1.0
+    market_growth_rate: 0.03
+    inflation_rate: 0.02
+    
+  # Product tiers (MVP three-tier system)
+  product:
+    tiers:
+      basic:
+        price_modifier: 0.8
+        risk_selection: 1.3
+      standard:
+        price_modifier: 1.0
+        risk_selection: 1.0
+      premium:
+        price_modifier: 1.3
+        risk_selection: 0.9
+
+# Plugin configuration (only essential plugins)
+plugins:
+  # Market events for dynamics
+  MarketEventsPlugin:
+    enabled: true
+    config:
+      event_probability: 0.05  # 5% chance per turn
+      event_types:
+        - boom
+        - recession
+      severity_range: [0.8, 1.2]  # ±20% market impact
+      
+  # Disable advanced features for MVP
+  CEOSystemPlugin:
+    enabled: false
+  
+  InvestmentManagerPlugin:
+    enabled: false
+    
+  RegulatoryCompliancePlugin:
+    enabled: false
+
+# Feature flags
+feature_flags:
+  - name: "plugin.MarketEventsPlugin"
+    enabled: true
+    scope: "semester"
+    
+  # Core features enabled
+  - name: "basic_turn_processing"
+    enabled: true
+    scope: "semester"
+    
+  - name: "price_competition"
+    enabled: true
+    scope: "semester"
+    
+  # Advanced features disabled
+  - name: "advanced_investments"
+    enabled: false
+    scope: "semester"
+    
+  - name: "employee_management"
+    enabled: false
+    scope: "semester"
+    
+  - name: "custom_products"
+    enabled: false
+    scope: "semester"
+
+# Custom rules for semester
+custom_rules:
+  # One scheduled catastrophe mid-semester
+  scheduled_events:
+    - turn: 8
+      type: "hurricane"
+      config:
+        states: ["FL", "TX"]
+        severity: "moderate"
+        
+  # Constraints for MVP
+  constraints:
+    max_companies_per_user: 1
+    allow_company_reset: false
+    enable_practice_mode: false
+    min_companies_for_turn: 1  # Process turns even with few players
+
+# Simple grading for MVP
+grading:
+  enabled: true
+  components:
+    - name: "participation"
+      weight: 0.3
+      metric: "turns_submitted_on_time"
+      
+    - name: "performance"
+      weight: 0.7
+      metric: "final_solvency_ratio"
+
+# Basic notifications
+notifications:
+  channels:
+    - in_game
+  reminders:
+    decision_deadline:
+      timing: "-3 hours"
+      message: "Turn decisions due at midnight tonight!"
+
+# Development settings (disable for production)
+development:
+  fast_forward_enabled: false
+  debug_mode: false
+  bypass_deadlines: false
+  show_hidden_metrics: false 

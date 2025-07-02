@@ -86,6 +86,7 @@ desktop.ini
 .env.test.local
 .env.production.local
 *.env
+!example.env
 
 # Docker
 docker-compose.override.yml

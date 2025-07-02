@@ -1,0 +1,277 @@
+# Example Semester Configuration
+# This file demonstrates all available configuration options for a semester
+
+# Configuration metadata
+version: "1.0"
+schema_version: 1
+
+# Semester information
+semester:
+  code: "2024_SPRING"
+  name: "Spring 2024"
+  start_date: "2024-01-15"
+  end_date: "2024-05-15"
+  description: "Spring 2024 semester for RMI 3501: Insurance Company Management"
+
+# Base configuration to inherit from
+base_configuration:
+  name: "default"  # Reference to GameConfiguration by name
+  version: 1       # Specific version to use
+
+# Game parameter overrides (only specify what changes from base)
+game_parameters:
+  # Economic parameters
+  economic:
+    base_demand_multiplier: 1.0
+    price_elasticity:
+      auto: -1.2
+      home: -0.8
+    market_growth_rate: 0.03
+    inflation_rate: 0.02
+    
+  # Turn timing parameters  
+  turn:
+    turn_duration_days: 7
+    decision_deadline: "Sunday 23:59:59 EST"
+    processing_start: "Monday 00:00:00 EST"
+    late_submission_penalty: 0.05
+    
+  # Initial values for new companies
+  initial_values:
+    starting_capital: 5000000
+    home_state_discount: 0.5
+    initial_solvency_ratio: 3.0
+    
+  # Employee system
+  employee:
+    skill_ranges:
+      min: 10
+      max: 100
+    salary_formula:
+      base: 100000
+      skill_multiplier: 2000
+    hiring_pool_size: 5
+    
+  # CEO system parameters
+  ceo_parameters:
+    starting_age_range:
+      min: 35
+      max: 40
+    attribute_ranges:
+      leadership:
+        min: 20
+        max: 40
+      risk_intelligence:
+        min: 20
+        max: 40
+      market_acumen:
+        min: 20
+        max: 40
+      regulatory_mastery:
+        min: 20
+        max: 40
+      innovation_capacity:
+        min: 20
+        max: 40
+      deal_making:
+        min: 20
+        max: 40
+      financial_expertise:
+        min: 20
+        max: 40
+      crisis_command:
+        min: 20
+        max: 40
+    progression:
+      profit_per_skill_point: 10000000  # $10M per skill point
+      retirement_age: 65
+    
+  # Employee hiring parameters
+  employee_parameters:
+    candidates_per_position: 3
+    skill_range:
+      min: 30
+      max: 80
+    special_bonus_chance: 0.15
+    
+  # Product tiers
+  product:
+    tiers:
+      basic:
+        price_modifier: 0.8
+        risk_selection: 1.3
+      standard:
+        price_modifier: 1.0
+        risk_selection: 1.0
+      premium:
+        price_modifier: 1.3
+        risk_selection: 0.9
+    switching_cost: 100000
+    
+  # Expansion parameters
+  expansion:
+    base_expansion_cost: 500000
+    distance_multiplier_formula: "1 + (distance / 1000)"
+    approval_weeks_base: 4
+    
+  # Investment parameters
+  investment:
+    cfo_skill_noise_formula: "1 - (skill / 100)"
+    liquidation_discount_base: 0.1
+    
+  # Claims generation
+  claims:
+    catastrophe_probability: 0.02
+    catastrophe_severity_multiplier: 10
+
+# Plugin configuration
+plugins:
+  # Core plugins
+  MarketEventsPlugin:
+    enabled: true
+    config:
+      event_probability: 0.10
+      event_types:
+        - boom
+        - recession
+        - catastrophe
+      severity_range: [0.5, 2.0]
+      
+  # Feature plugins
+  CEOSystemPlugin:
+    enabled: true
+    config:
+      enable_progression: true
+      enable_retirement: true
+      enable_special_bonuses: true
+    
+  InvestmentManagerPlugin:
+    enabled: true
+    config:
+      rebalance_frequency: "monthly"
+      skill_impact_multiplier: 1.5
+      
+  RegulatoryCompliancePlugin:
+    enabled: true
+    config:
+      audit_base_probability: 0.1
+      compliance_check_frequency: "quarterly"
+
+# Feature flags specific to this semester
+feature_flags:
+  # Core features
+  - name: "plugin.MarketEventsPlugin"
+    enabled: true
+    scope: "semester"
+    
+  - name: "plugin.InvestmentManagerPlugin"
+    enabled: true
+    scope: "semester"
+    
+  - name: "plugin.RegulatoryCompliancePlugin"
+    enabled: true
+    scope: "semester"
+    
+  # Advanced features (disabled for MVP)
+  - name: "advanced_reporting"
+    enabled: false
+    scope: "semester"
+    
+  - name: "custom_products"
+    enabled: false
+    scope: "semester"
+    
+  - name: "middle_management"
+    enabled: false
+    scope: "semester"
+
+# Custom rules for this semester
+custom_rules:
+  # Scheduled events
+  scheduled_events:
+    - turn: 5
+      type: "hurricane"
+      config:
+        states: ["FL", "TX", "LA"]
+        severity: "major"
+        
+    - turn: 10
+      type: "market_crash"
+      config:
+        sectors: ["all"]
+        severity: "moderate"
+        
+  # Special bonuses or penalties
+  special_modifiers:
+    early_bird_bonus:
+      description: "5% capital bonus for companies created in first 2 weeks"
+      value: 0.05
+      condition: "created_before_turn_2"
+      
+  # Semester-specific constraints
+  constraints:
+    max_companies_per_user: 1
+    allow_company_reset: false
+    enable_practice_mode: true
+
+# Research/experiment configuration
+experiments:
+  # A/B testing configuration
+  ab_tests:
+    - name: "demand_elasticity_study"
+      description: "Testing different price elasticity values"
+      groups:
+        control:
+          percentage: 50
+          parameters:
+            price_elasticity_modifier: 1.0
+        treatment:
+          percentage: 50
+          parameters:
+            price_elasticity_modifier: 1.2
+            
+  # Data collection settings
+  data_collection:
+    enhanced_logging: true
+    decision_tracking: true
+    performance_metrics:
+      - profitability
+      - market_share
+      - solvency_ratio
+      - employee_satisfaction
+
+# Grading integration (optional)
+grading:
+  enabled: true
+  components:
+    - name: "participation"
+      weight: 0.2
+      metric: "turns_submitted_on_time"
+      
+    - name: "performance"
+      weight: 0.5
+      metric: "final_company_value"
+      
+    - name: "strategy"
+      weight: 0.3
+      metric: "instructor_evaluation"
+
+# Notification settings
+notifications:
+  channels:
+    - email
+    - in_game
+  reminders:
+    decision_deadline:
+      timing: "-3 hours"
+      message: "Reminder: Turn decisions due in 3 hours"
+    turn_results:
+      timing: "+1 hour"
+      message: "Turn {turn_number} results are now available"
+
+# Development/debug settings (ignored in production)
+development:
+  fast_forward_enabled: true
+  debug_mode: true
+  bypass_deadlines: false
+  show_hidden_metrics: true 

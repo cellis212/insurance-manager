@@ -1,0 +1,276 @@
+# Semester Configuration Schema Definition
+# This file documents the expected structure and validation rules for semester configuration files
+
+# Schema metadata
+schema:
+  version: "1.0"
+  description: "Schema for Insurance Manager semester configuration files"
+
+# Required top-level fields
+required_fields:
+  - version
+  - schema_version
+  - semester
+
+# Field definitions
+fields:
+  version:
+    type: string
+    description: "Configuration format version"
+    pattern: "^\\d+\\.\\d+$"
+    example: "1.0"
+    
+  schema_version:
+    type: integer
+    description: "Schema version for migration support"
+    minimum: 1
+    example: 1
+    
+  semester:
+    type: object
+    description: "Semester identification and timing"
+    required:
+      - code
+      - name
+      - start_date
+      - end_date
+    properties:
+      code:
+        type: string
+        description: "Unique semester identifier"
+        pattern: "^\\d{4}_(SPRING|SUMMER|FALL|WINTER)$"
+        example: "2024_SPRING"
+      name:
+        type: string
+        description: "Human-readable semester name"
+        example: "Spring 2024"
+      start_date:
+        type: string
+        format: date
+        description: "Semester start date (YYYY-MM-DD)"
+        example: "2024-01-15"
+      end_date:
+        type: string
+        format: date
+        description: "Semester end date (YYYY-MM-DD)"
+        example: "2024-05-15"
+      description:
+        type: string
+        description: "Optional semester description"
+        required: false
+        
+  base_configuration:
+    type: object
+    description: "Reference to base GameConfiguration"
+    required: false
+    properties:
+      name:
+        type: string
+        description: "Name of the base configuration"
+        example: "default"
+      version:
+        type: integer
+        description: "Specific version to use"
+        example: 1
+        
+  game_parameters:
+    type: object
+    description: "Game parameter overrides organized by category"
+    required: false
+    properties:
+      economic:
+        type: object
+        description: "Economic and market parameters"
+      turn:
+        type: object
+        description: "Turn timing and processing parameters"
+      initial_values:
+        type: object
+        description: "Starting values for new companies"
+      regulatory:
+        type: object
+        description: "Regulatory system parameters"
+      employee:
+        type: object
+        description: "Employee system parameters"
+      product:
+        type: object
+        description: "Product tier parameters"
+      expansion:
+        type: object
+        description: "Geographic expansion parameters"
+      investment:
+        type: object
+        description: "Investment system parameters"
+      claims:
+        type: object
+        description: "Claims generation parameters"
+      miscellaneous:
+        type: object
+        description: "Other parameters"
+        
+  plugins:
+    type: object
+    description: "Plugin-specific configuration"
+    required: false
+    additionalProperties:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: "Whether the plugin is enabled"
+        config:
+          type: object
+          description: "Plugin-specific configuration"
+          
+  feature_flags:
+    type: array
+    description: "Feature flags for this semester"
+    required: false
+    items:
+      type: object
+      required:
+        - name
+        - enabled
+        - scope
+      properties:
+        name:
+          type: string
+          description: "Feature flag name"
+        enabled:
+          type: boolean
+          description: "Whether the feature is enabled"
+        scope:
+          type: string
+          enum: ["global", "semester", "user", "company"]
+          description: "Scope of the feature flag"
+        rollout_percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: "Percentage rollout (optional)"
+          
+  custom_rules:
+    type: object
+    description: "Semester-specific custom rules and events"
+    required: false
+    properties:
+      scheduled_events:
+        type: array
+        description: "Pre-scheduled game events"
+        items:
+          type: object
+          required:
+            - turn
+            - type
+          properties:
+            turn:
+              type: integer
+              description: "Turn number when event occurs"
+            type:
+              type: string
+              description: "Event type"
+            config:
+              type: object
+              description: "Event-specific configuration"
+      special_modifiers:
+        type: object
+        description: "Special bonuses or penalties"
+      constraints:
+        type: object
+        description: "Semester-specific constraints"
+        
+  experiments:
+    type: object
+    description: "Research and A/B testing configuration"
+    required: false
+    properties:
+      ab_tests:
+        type: array
+        description: "A/B test definitions"
+      data_collection:
+        type: object
+        description: "Enhanced data collection settings"
+        
+  grading:
+    type: object
+    description: "Grade calculation configuration"
+    required: false
+    properties:
+      enabled:
+        type: boolean
+        description: "Whether grading is enabled"
+      components:
+        type: array
+        description: "Grading components"
+        
+  notifications:
+    type: object
+    description: "Notification configuration"
+    required: false
+    properties:
+      channels:
+        type: array
+        description: "Enabled notification channels"
+        items:
+          type: string
+          enum: ["email", "sms", "in_game", "webhook"]
+      reminders:
+        type: object
+        description: "Reminder configurations"
+        
+  development:
+    type: object
+    description: "Development/debug settings (ignored in production)"
+    required: false
+    properties:
+      fast_forward_enabled:
+        type: boolean
+        description: "Allow time manipulation"
+      debug_mode:
+        type: boolean
+        description: "Enable debug logging"
+      bypass_deadlines:
+        type: boolean
+        description: "Disable deadline enforcement"
+      show_hidden_metrics:
+        type: boolean
+        description: "Show internal metrics"
+
+# Validation rules
+validation_rules:
+  - description: "start_date must be before end_date"
+    rule: "semester.start_date < semester.end_date"
+    
+  - description: "Plugin names must match discovered plugins"
+    rule: "plugins.keys() subset of discovered_plugins"
+    
+  - description: "Feature flag names must be unique"
+    rule: "len(feature_flags) == len(set(flag.name for flag in feature_flags))"
+    
+  - description: "Scheduled events must be within semester duration"
+    rule: "all(1 <= event.turn <= total_turns for event in custom_rules.scheduled_events)"
+    
+  - description: "A/B test percentages must sum to 100"
+    rule: "sum(group.percentage for group in test.groups) == 100 for test in experiments.ab_tests"
+
+# Environment-specific overrides
+environments:
+  development:
+    allowed_fields: ["development"]
+    validation_mode: "warn"
+    
+  staging:
+    allowed_fields: []
+    validation_mode: "strict"
+    disallowed_values:
+      development: "*"
+      
+  production:
+    allowed_fields: []
+    validation_mode: "strict"
+    required_fields_additional:
+      - base_configuration
+    disallowed_values:
+      development: "*"
+      grading.enabled: false  # Must be explicitly enabled 
