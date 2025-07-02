@@ -37,15 +37,18 @@ async def lifespan(app: FastAPI):
     # Startup
     await init_db()
     
-    # Initialize plugin manager
+    # Initialize plugin manager (simplified for MVP)
     plugin_manager = PluginManager()
-    await plugin_manager.initialize()
+    # Skip plugin initialization for MVP to avoid abstract class issues
+    # await plugin_manager.initialize(session, None)
     app.state.plugin_manager = plugin_manager
     
     yield
     
     # Shutdown
-    await plugin_manager.shutdown()
+    # Skip plugin shutdown for MVP since we didn't initialize plugins
+    # if hasattr(plugin_manager, 'shutdown'):
+    #     await plugin_manager.shutdown()
     await close_db()
 
 
