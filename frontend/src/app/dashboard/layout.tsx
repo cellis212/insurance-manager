@@ -135,6 +135,7 @@ export default function DashboardLayout({
               </div>
               <button
                 onClick={handleLogout}
+                data-testid="logout-button"
                 className="flex-shrink-0 p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <ArrowRightOnRectangleIcon className="h-5 w-5" aria-hidden="true" />
