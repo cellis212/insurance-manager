@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_session
 from core.models import (
     Company, Semester, Turn, GameEvent,
     CEO, Employee
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1/market-events", tags=["market-events"])
 @router.get("/economic-phase/{company_id}")
 async def get_economic_phase(
     company_id: UUID,
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_session)
 ) -> Dict:
     """Get current economic phase and CEO insights if applicable.
     
@@ -95,7 +95,7 @@ async def get_economic_phase(
 @router.get("/active-events/{semester_id}")
 async def get_active_market_events(
     semester_id: UUID,
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_session)
 ) -> Dict:
     """Get all currently active market events.
     
@@ -158,7 +158,7 @@ async def get_active_market_events(
 async def get_competitor_info(
     semester_id: UUID,
     include_details: bool = Query(False, description="Include detailed competitor information"),
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_session)
 ) -> Dict:
     """Get information about AI competitor companies.
     
@@ -229,7 +229,7 @@ async def get_competitor_info(
 async def get_economic_history(
     semester_id: UUID,
     limit: int = Query(52, ge=1, le=104, description="Number of weeks to retrieve"),
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_session)
 ) -> Dict:
     """Get historical economic phase data for the semester.
     
@@ -298,7 +298,7 @@ async def get_event_history(
     semester_id: UUID,
     event_type: Optional[str] = Query(None, description="Filter by event type"),
     limit: int = Query(20, ge=1, le=100, description="Number of events to retrieve"),
-    session: AsyncSession = Depends(get_db)
+    session: AsyncSession = Depends(get_session)
 ) -> Dict:
     """Get historical market events for the semester.
     

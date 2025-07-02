@@ -35,29 +35,38 @@ An educational simulation game for insurance and risk management, designed for a
    ```bash
    cp example.env .env
    # Edit .env with your configuration
+   # Note: A working .env file is already provided for development
    ```
 
-3. **Start services with Docker Compose**
+3. **Install Python dependencies**
    ```bash
-   docker-compose up -d
+   pip install -r requirements.txt
+   # Or create a virtual environment first:
+   # python -m venv venv && source venv/bin/activate
    ```
 
-4. **Run database migrations**
+4. **Start services with Docker Compose (optional)**
+   ```bash
+   docker-compose up -d postgres redis
+   # Only start database services if you prefer local Python development
+   ```
+
+5. **Run database migrations**
    ```bash
    alembic upgrade head
    ```
 
-5. **Load seed data**
+6. **Load seed data**
    ```bash
-   python core/seed_data.py
+   python scripts/load_initial_data.py
    ```
 
-6. **Start the backend development server**
+7. **Start the backend development server**
    ```bash
    uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-7. **Start the frontend development server**
+8. **Start the frontend development server**
    ```bash
    cd frontend
    npm install
@@ -67,7 +76,8 @@ An educational simulation game for insurance and risk management, designed for a
 The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000
-- API Documentation: http://localhost:8000/api/docs
+- API Documentation: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
 
 ## Authentication
 

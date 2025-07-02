@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_session
 from features.products.services.product_manager import ProductManager
 from features.products.services.tier_calculator import TierCalculator
 from features.products.plugin import ProductSystemPlugin
@@ -74,7 +74,7 @@ class ProductResponse(BaseModel):
     
     class Config:
         """Pydantic config."""
-        orm_mode = True
+        from_attributes = True
 
 
 class ProductPerformanceResponse(BaseModel):
@@ -113,7 +113,7 @@ async def get_current_company_id(
 
 @router.get("/tiers", response_model=List[TierModifiersResponse])
 async def get_tier_information(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[TierModifiersResponse]:
     """Get information about all product tiers.
     
@@ -143,7 +143,7 @@ async def get_tier_information(
 async def create_product(
     request: ProductCreateRequest,
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> ProductResponse:
     """Create a new product offering.
     
@@ -201,7 +201,7 @@ async def list_company_products(
     state_id: Optional[UUID] = None,
     line_of_business_id: Optional[UUID] = None,
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[ProductResponse]:
     """List all products for the current company.
     
@@ -244,7 +244,7 @@ async def list_company_products(
 async def get_product(
     product_id: UUID,
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> ProductResponse:
     """Get details for a specific product.
     
@@ -287,7 +287,7 @@ async def switch_product_tier(
     product_id: UUID,
     request: TierSwitchRequest,
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Initiate a product tier switch.
     
@@ -335,7 +335,7 @@ async def get_product_performance(
     product_id: UUID,
     weeks: int = 4,
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[ProductPerformanceResponse]:
     """Get performance history for a product.
     
@@ -379,7 +379,7 @@ async def get_product_performance(
 @router.get("/summary", response_model=dict)
 async def get_product_summary(
     company_id: UUID = Depends(get_current_company_id),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Get comprehensive product summary for the company.
     

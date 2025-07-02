@@ -94,6 +94,24 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class ChangePasswordRequest(BaseModel):
+    """Change password request."""
+    old_password: str
+    new_password: str = Field(..., min_length=8, description="New password must be at least 8 characters")
+    
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        """Validate new password strength."""
+        if not any(c.isupper() for c in v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not any(c.islower() for c in v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not any(c.isdigit() for c in v):
+            raise ValueError("Password must contain at least one digit")
+        return v
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserRegister,
@@ -376,16 +394,14 @@ async def revoke_specific_session(
 
 @router.put("/password")
 async def change_password(
-    old_password: str,
-    new_password: str = Field(..., min_length=8),
+    password_data: ChangePasswordRequest,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Change user password.
     
     Args:
-        old_password: Current password
-        new_password: New password
+        password_data: Password change request data
         current_user: Current authenticated user
         db: Database session
         
@@ -396,14 +412,14 @@ async def change_password(
         HTTPException: If old password is incorrect
     """
     # Verify old password
-    if not verify_password(old_password, current_user.password_hash):
+    if not verify_password(password_data.old_password, current_user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid current password"
         )
     
     # Update password
-    current_user.password_hash = get_password_hash(new_password)
+    current_user.password_hash = get_password_hash(password_data.new_password)
     await db.commit()
     
     # Revoke all sessions to force re-login
