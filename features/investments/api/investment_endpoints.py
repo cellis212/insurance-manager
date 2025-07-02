@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from core.database import get_db
+from core.database import get_session
 from core.models.company import Company
 from core.models.investment_portfolio import InvestmentPortfolio
 from core.models.liquidation_event import LiquidationEvent
@@ -95,7 +95,7 @@ class CFOInsightResponse(BaseModel):
 @router.post("/preferences", response_model=InvestmentDecisionResponse)
 async def set_portfolio_preferences(
     preferences: PortfolioPreferences,
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
     company: Company = Depends(get_current_company)
 ) -> InvestmentDecisionResponse:
     """Set portfolio characteristic preferences.
@@ -154,7 +154,7 @@ async def set_portfolio_preferences(
 
 @router.get("/portfolio", response_model=Optional[PortfolioResponse])
 async def get_current_portfolio(
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
     company: Company = Depends(get_current_company)
 ) -> Optional[PortfolioResponse]:
     """Get current portfolio status.
@@ -206,7 +206,7 @@ async def get_current_portfolio(
 
 @router.get("/insights", response_model=CFOInsightResponse)
 async def get_cfo_insights(
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
     company: Company = Depends(get_current_company)
 ) -> CFOInsightResponse:
     """Get CFO insights on current portfolio.
@@ -273,7 +273,7 @@ async def get_cfo_insights(
 @router.get("/liquidations", response_model=List[LiquidationEventResponse])
 async def get_liquidation_history(
     limit: int = 10,
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
     company: Company = Depends(get_current_company)
 ) -> List[LiquidationEventResponse]:
     """Get history of forced liquidations.
@@ -304,7 +304,7 @@ async def get_liquidation_history(
 
 @router.get("/constraints", response_model=Dict[str, Any])
 async def get_investment_constraints(
-    session: AsyncSession = Depends(get_db),
+    session: AsyncSession = Depends(get_session),
     company: Company = Depends(get_current_company)
 ) -> Dict[str, Any]:
     """Get current investment constraints based on company state.

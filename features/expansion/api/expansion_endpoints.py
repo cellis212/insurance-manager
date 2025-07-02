@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_session
 from core.models import Company, State, CompanyStateAuthorization
 from features.expansion.services import ExpansionCalculator, ApprovalWorkflow
 
@@ -86,7 +86,7 @@ from api.auth_utils import get_current_company
 # Dependency to get game configuration
 async def get_expansion_config(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Get expansion configuration for the current semester."""
     from core.models import Semester, SemesterConfiguration, GameConfiguration
@@ -157,7 +157,7 @@ async def get_expansion_opportunities(
     budget: Optional[Decimal] = Query(None, description="Maximum budget for expansion"),
     company: Company = Depends(get_current_company),
     config: dict = Depends(get_expansion_config),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[ExpansionOpportunityResponse]:
     """Get available expansion opportunities for the company.
     
@@ -193,7 +193,7 @@ async def calculate_expansion_cost(
     state_code: str,
     company: Company = Depends(get_current_company),
     config: dict = Depends(get_expansion_config),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> ExpansionCostResponse:
     """Calculate the cost to expand into a specific state.
     
@@ -223,7 +223,7 @@ async def request_expansion(
     request: ExpansionRequestBody,
     company: Company = Depends(get_current_company),
     config: dict = Depends(get_expansion_config),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> ExpansionRequestResponse:
     """Request expansion to one or more states.
     
@@ -299,7 +299,7 @@ async def request_expansion(
 async def get_pending_expansions(
     company: Company = Depends(get_current_company),
     config: dict = Depends(get_expansion_config),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[PendingExpansionResponse]:
     """Get all pending expansion requests for the company."""
     calculator = ExpansionCalculator(config)
@@ -317,7 +317,7 @@ async def get_pending_expansions(
 async def get_authorized_states(
     company: Company = Depends(get_current_company),
     config: dict = Depends(get_expansion_config),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[AuthorizedStateResponse]:
     """Get all states the company is authorized to operate in."""
     calculator = ExpansionCalculator(config)

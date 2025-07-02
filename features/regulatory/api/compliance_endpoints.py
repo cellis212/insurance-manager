@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
-from core.database import get_db
+from core.database import get_session
 from core.models import Company, State, GameEvent
 from features.regulatory.services import ComplianceCalculator, AuditSystem
 
@@ -72,7 +72,7 @@ from api.auth_utils import get_current_company
 @router.get("/compliance/score", response_model=ComplianceScoreResponse)
 async def get_compliance_score(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> ComplianceScoreResponse:
     """Get current compliance score for the company"""
     calculator = ComplianceCalculator(db)
@@ -91,7 +91,7 @@ async def get_compliance_score(
 async def get_compliance_history(
     weeks: int = Query(52, description="Number of weeks to look back"),
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[dict]:
     """Get compliance score history"""
     # This would need to be enhanced to store historical scores
@@ -109,7 +109,7 @@ async def get_compliance_history(
 @router.get("/audits/current", response_model=List[AuditResponse])
 async def get_current_audits(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[AuditResponse]:
     """Get currently active audits"""
     audit_system = AuditSystem(db)
@@ -141,7 +141,7 @@ async def get_current_audits(
 async def get_audit_history(
     weeks: int = Query(52, description="Number of weeks to look back"),
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[dict]:
     """Get audit history"""
     audit_system = AuditSystem(db)
@@ -163,7 +163,7 @@ async def get_audit_history(
 @router.get("/states/{state_code}/requirements", response_model=StateRequirementsResponse)
 async def get_state_requirements(
     state_code: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> StateRequirementsResponse:
     """Get regulatory requirements for a specific state"""
     # Get state info
@@ -219,7 +219,7 @@ async def get_state_requirements(
 @router.get("/status", response_model=CompanyRegulatoryStatusResponse)
 async def get_regulatory_status(
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> CompanyRegulatoryStatusResponse:
     """Get complete regulatory status for the company"""
     # Get compliance score
@@ -318,7 +318,7 @@ async def get_regulatory_status(
 async def estimate_penalties(
     violations: List[str] = Query(..., description="List of violations to estimate"),
     company: Company = Depends(get_current_company),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> dict:
     """Estimate potential penalties for given violations"""
     from features.regulatory.services import PenaltyEngine

@@ -7,9 +7,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.database import get_session
 from core.models.company import Company
 from core.models.user import User
+from api.auth_utils import get_current_user
 from features.ceo_system.services.ceo_creation import CEOCreationService
 from features.ceo_system.services.employee_hiring import EmployeeHiringService
 
@@ -97,7 +98,7 @@ async def search_universities(
     state: str | None = None,
     has_rmi: bool | None = None,
     limit: int = 20,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ):
     """Search for universities by name, state, or RMI program availability.
     
@@ -160,7 +161,7 @@ async def search_universities(
 async def create_ceo(
     request: CreateCEORequest,
     current_user: User = Depends(get_current_user),  # You'll need to implement this
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ):
     """Create a new CEO for the user's company.
     
@@ -235,7 +236,7 @@ async def create_ceo(
 @router.get("/me", response_model=CEOAttributesResponse)
 async def get_my_ceo(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ):
     """Get the current user's CEO details."""
     # Get user's company with CEO
@@ -280,7 +281,7 @@ async def get_my_ceo(
 @router.get("/employees", response_model=List[Dict[str, Any]])
 async def get_current_employees(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> List[Dict[str, Any]]:
     """Get all current employees for the user's company."""
     # Get user's company
@@ -330,7 +331,7 @@ async def get_current_employees(
 async def fire_employee(
     employee_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ) -> Dict[str, Any]:
     """Fire an employee immediately.
     
@@ -401,7 +402,7 @@ async def _get_current_turn_number(db: AsyncSession, semester_id: str) -> int:
 @router.get("/hiring-pool", response_model=Dict[str, List[EmployeeCandidateResponse]])
 async def get_hiring_pool(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ):
     """Get the current week's available employee candidates."""
     # Get current turn number from the database
@@ -441,7 +442,7 @@ async def get_hiring_pool(
 async def hire_employee(
     request: HireEmployeeRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_session)
 ):
     """Hire an employee from the current hiring pool."""
     # Get user's company

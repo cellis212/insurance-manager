@@ -84,6 +84,26 @@ class Settings(BaseSettings):
         description="Path to current semester configuration"
     )
     
+    # Environment Configuration
+    environment: str = Field(
+        default="development",
+        description="Current environment (development, staging, production)"
+    )
+    
+    # Feature Flags
+    enable_market_events: bool = Field(
+        default=True,
+        description="Enable market events and economic cycles"
+    )
+    enable_regulatory_compliance: bool = Field(
+        default=True,
+        description="Enable regulatory compliance system"
+    )
+    enable_investments: bool = Field(
+        default=True,
+        description="Enable investment portfolio system"
+    )
+    
     @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, v: str) -> str:
