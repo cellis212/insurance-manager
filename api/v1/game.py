@@ -53,7 +53,7 @@ class CompanyResponse(BaseModel):
     product_count: int
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TurnDecisionRequest(BaseModel):
