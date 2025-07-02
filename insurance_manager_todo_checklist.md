@@ -987,6 +987,20 @@
 
 ## Recent Work Summary (December 28, 2024)
 
+### Completed TODO Items & Code Quality Improvements
+
+**Fixed TODOs and Placeholder Code:**
+- Fixed CEO System API hardcoded turn numbers: Replaced `current_turn = 1` with proper database queries to get actual current turn from Turn table in both hiring pool and employee hiring endpoints
+- Implemented proper semester configuration loading for Expansion API: Replaced hardcoded configuration with database-driven configuration that inherits from GameConfiguration and applies SemesterConfiguration overrides  
+- Implemented proper semester configuration loading for Investment API: Added `_get_investment_config()` helper function that loads configuration from database instead of using hardcoded values
+- All changes follow the project's "no mock data, no fallback code" principle while maintaining proper error handling with sensible defaults
+
+**Technical Implementation Details:**
+- Created `_get_current_turn_number()` helper function that queries active turns by semester and status
+- Enhanced expansion and investment APIs to load configuration from Semester → SemesterConfiguration → GameConfiguration hierarchy
+- Maintained backward compatibility with proper fallback to default values when configuration is missing
+- Used proper async/await patterns and database transactions
+
 ### Completed Performance Optimizations & UI Polish
 
 **Performance Optimization - Caching Strategies:**
