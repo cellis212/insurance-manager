@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Production build
+.next/
+out/
+dist/
+build/
+
+# Cache and temporary files
+.cache/
+.turbo/
+*.log
+
+# Generated files
+next-env.d.ts
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml 
