@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { gameApi, University, AcademicBackground } from '@/lib/api-services';
 import { useAuthStore } from '@/stores/auth-store';
+import { queryKeys, queryCacheConfigs } from '@/lib/query-client';
 
 export default function CreateCompanyPage() {
   const router = useRouter();
@@ -21,13 +22,15 @@ export default function CreateCompanyPage() {
 
   // Fetch data
   const { data: backgrounds } = useQuery({
-    queryKey: ['academic-backgrounds'],
+    queryKey: ['academic-backgrounds'], // Keep custom key since not in queryKeys yet
     queryFn: gameApi.getAcademicBackgrounds,
+    ...queryCacheConfigs.static, // Academic backgrounds never change - cache for 24 hours
   });
 
   const { data: universities } = useQuery({
-    queryKey: ['universities'],
+    queryKey: queryKeys.universities(),
     queryFn: gameApi.getUniversities,
+    ...queryCacheConfigs.static, // Universities never change - cache for 24 hours
   });
 
   // Create company mutation

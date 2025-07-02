@@ -5,6 +5,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryClient } from '@/lib/query-client';
 import { UserGroupIcon, UserPlusIcon, UserMinusIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface Employee {
   id: string;
@@ -75,10 +76,14 @@ export default function EmployeesPage() {
         candidate_name: candidateName,
         position 
       }),
-    onSuccess: () => {
+    onSuccess: (_, { candidateName, position }) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       queryClient.invalidateQueries({ queryKey: ['hiring-pool'] });
       setSelectedPosition(null);
+      toast.success(`Successfully hired ${candidateName} as ${position}!`);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to hire employee');
     },
   });
 
@@ -88,6 +93,10 @@ export default function EmployeesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setConfirmFire(null);
+      toast.success('Employee terminated successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to terminate employee');
     },
   });
 

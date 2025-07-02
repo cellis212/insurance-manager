@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { queryClient } from '@/lib/query-client';
+import { queryClient, queryKeys, queryCacheConfigs } from '@/lib/query-client';
 import { CubeIcon, ArrowsUpDownIcon, PlusIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface State {
   id: string;
@@ -62,13 +63,15 @@ export default function ProductsPage() {
   const [newProductPremium, setNewProductPremium] = useState('1000');
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
+    queryKey: queryKeys.products('current'), // Semi-static - changes when products are added/modified
     queryFn: () => apiClient.get<Product[]>('/products'),
+    ...queryCacheConfigs.semiStatic, // Cache for 1 hour
   });
 
   const { data: tierInfo } = useQuery({
-    queryKey: ['tier-info'],
+    queryKey: ['tier-info'], // Keep custom key since not in queryKeys yet
     queryFn: () => apiClient.get<TierInfo[]>('/products/tiers'),
+    ...queryCacheConfigs.static, // Tier info is static - cache for 24 hours
   });
 
   const { data: companyInfo } = useQuery({
@@ -77,16 +80,21 @@ export default function ProductsPage() {
   });
 
   const { data: linesOfBusiness } = useQuery({
-    queryKey: ['lines-of-business'],
+    queryKey: queryKeys.linesOfBusiness(),
     queryFn: () => apiClient.get<LineOfBusiness[]>('/game/lines-of-business'),
+    ...queryCacheConfigs.static, // Cache for 24 hours
   });
 
   const switchTierMutation = useMutation({
     mutationFn: ({ productId, newTier }: { productId: string; newTier: string }) => 
       apiClient.post(`/products/${productId}/switch-tier`, { new_tier: newTier }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products('current') });
       setSelectedProduct(null);
+      toast.success('Product tier switch initiated. Changes will take effect in 2 weeks.');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to switch product tier');
     },
   });
 
@@ -100,12 +108,16 @@ export default function ProductsPage() {
       coverage_limit: number;
     }) => apiClient.post('/products', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products('current') });
       setShowAddProduct(false);
       setNewProductState('');
       setNewProductLine('');
       setNewProductTier('Standard');
       setNewProductPremium('1000');
+      toast.success('Product created successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to create product');
     },
   });
 

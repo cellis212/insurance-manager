@@ -5,6 +5,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { queryClient } from '@/lib/query-client';
 import { CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface State {
   id: string;
@@ -41,9 +42,14 @@ export default function ExpansionPage() {
   const expansionMutation = useMutation({
     mutationFn: (stateId: string) => 
       apiClient.post(`/expansion/request/${stateId}`),
-    onSuccess: () => {
+    onSuccess: (_, stateId) => {
       queryClient.invalidateQueries({ queryKey: ['expansion-opportunities'] });
+      const stateName = selectedState?.state.name || 'the state';
+      toast.success(`Expansion request for ${stateName} submitted! Approval expected in ${selectedState?.estimated_weeks || 4} weeks.`);
       setSelectedState(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to submit expansion request');
     },
   });
 

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
 import { gameApi } from '@/lib/api-services';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { 
   HomeIcon, 
   BuildingOfficeIcon, 
@@ -144,7 +145,9 @@ export default function DashboardLayout({
 
         {/* Main content */}
         <div className="flex-1 overflow-y-auto">
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

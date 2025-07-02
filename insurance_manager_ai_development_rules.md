@@ -1,5 +1,9 @@
 # Insurance Manager - AI Development Rules
 
+General Rules:
+- Try to avoid numbering things in code comments since it is annoying to change later.
+- All future work, todos, notes to yourself, etc. should be put in the main todo list.  That is THE central repository for info you want to keep.
+
 ## Core Architecture Principles
 
 1. **Extensibility Over Perfection** - Every system must be built with a plugin-based architecture that allows features to be added without modifying core code. Use interfaces, event buses, and JSONB fields liberally. The MVP should ship quickly while providing clear paths for future complexity.
@@ -74,19 +78,61 @@
 
 26. **No Feature Creep in MVP** - The blueprint contains many advanced features. Implement hooks for them but don't build them until Phase 10+. Ship the MVP first.
 
+## Git Usage and Version Control
+
+27. **No Submodules** - Keep everything in a single repository. Git submodules add complexity and frequently cause issues (as seen with the frontend). Use a monorepo structure instead.
+
+28. **Meaningful Commit Messages** - Follow conventional commits format: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`. Include the affected system in brackets: `feat(investments): add CFO skill effects to portfolio perception`.
+
+29. **Environment Files Strategy** - Always provide `.env.example` with all required variables. Never commit actual `.env` files. Use descriptive variable names and include comments explaining each variable's purpose.
+
+30. **Migration Discipline** - Create separate migrations for each feature. Name migrations descriptively with timestamps. Test rollback procedures even though semesters reset. Never edit existing migrations - create new ones to fix issues.
+
+31. **Feature Branch Workflow** - Create feature branches for each todo item. Keep PRs small and focused. Don't mix refactoring with new features. Always test the full game flow before merging.
+
+## Database and Async Patterns
+
+32. **Async All The Way** - FastAPI is async by design. Use `asyncpg` for database connections, not synchronous SQLAlchemy. If using connection pools, use `NullPool` for async compatibility, not `QueuePool`.
+
+33. **Explicit Session Management** - Always use explicit database sessions. Pass `db: AsyncSession` as a dependency. Never use global database connections or implicit sessions.
+
+34. **JSONB Schema Versioning** - Every JSONB field must include a `schema_version`. Create migration utilities to handle schema updates within semesters. Document the schema in comments above the field.
+
+## Implementation Best Practices
+
+35. **Check Before Building** - Always search the codebase first. Many features are already implemented in the simulations folder or as part of other systems. Don't recreate what already exists.
+
+36. **Real Data Only** - Use real data whenever possible: actual university names, real state coordinates, accurate distances. Never use placeholder data that will need to be replaced later.
+
+37. **Clean Up After Yourself** - Delete temporary files, test scripts, and debugging code before committing. The codebase will be public - keep it clean and professional.
+
+38. **Error Handling Without Fallbacks** - Never hide errors with mock data or fallback values. If something fails, let it fail visibly. Fix the root cause instead of masking it.
+
+39. **Save Intermediate Outputs** - All data processing pipelines should save intermediate results by default. This aids debugging and allows resuming failed processes.
+
+## Frontend Development Patterns
+
+40. **Trust the Backend** - The backend is complete and tested. Don't add client-side validation that duplicates backend logic. Let the backend be the single source of truth.
+
+41. **Loading States Everywhere** - Every data fetch needs a loading state. Use skeleton loaders that match the shape of the expected content. Never show blank screens.
+
+42. **Consistent Error Boundaries** - Wrap feature components in error boundaries. Show user-friendly error messages. Provide a way to retry or navigate away from errors.
+
+43. **No Local State for Server Data** - Use TanStack Query for all server state. Only use local state for UI-specific concerns (modals, form inputs, etc.). Server state should always reflect the backend.
+
 ## Testing Strategy with Playwright
 
 ### Core Testing Principles
 
-27. **Test User Journeys, Not Implementation** - Playwright tests should focus on complete user workflows (create CEO → expand to state → submit turn → view results) rather than individual component behavior.
+44. **Test User Journeys, Not Implementation** - Playwright tests should focus on complete user workflows (create CEO → expand to state → submit turn → view results) rather than individual component behavior.
 
-28. **Visual Regression Testing** - Use Playwright's screenshot capabilities to catch UI regressions, especially for complex interfaces like the investment portfolio sliders and executive office dashboards.
+45. **Visual Regression Testing** - Use Playwright's screenshot capabilities to catch UI regressions, especially for complex interfaces like the investment portfolio sliders and executive office dashboards.
 
-29. **Test Information Asymmetry** - Create specific tests that verify novice vs expert CFOs see different information in the investment interface. This is core to the game's strategy layer.
+46. **Test Information Asymmetry** - Create specific tests that verify novice vs expert CFOs see different information in the investment interface. This is core to the game's strategy layer.
 
 ### Critical User Flows to Test
 
-30. **New Player Onboarding Flow**
+47. **New Player Onboarding Flow**
    ```typescript
    test('complete character creation and first turn', async ({ page }) => {
      // Select academic background (RMI + second major)
@@ -99,7 +145,7 @@
    });
    ```
 
-31. **Turn Submission Deadline**
+48. **Turn Submission Deadline**
    ```typescript
    test('enforce Sunday midnight deadline', async ({ page }) => {
      // Submit partial decisions
@@ -111,7 +157,7 @@
    });
    ```
 
-32. **Investment Crisis Liquidation**
+49. **Investment Crisis Liquidation**
    ```typescript
    test('CFO skill affects liquidation choices', async ({ page }) => {
      // Create catastrophe triggering liquidation need
@@ -124,7 +170,7 @@
 
 ### Performance and Scale Testing
 
-33. **Concurrent Player Testing**
+50. **Concurrent Player Testing**
    ```typescript
    test('100 concurrent players submit turns', async ({ browser }) => {
      const contexts = await Promise.all(
@@ -137,7 +183,7 @@
    });
    ```
 
-34. **State Machine Testing** - Test that game state transitions are valid:
+51. **State Machine Testing** - Test that game state transitions are valid:
    - Cannot submit decisions after deadline
    - Cannot hire employees without sufficient capital
    - Cannot expand without regulatory approval
@@ -145,7 +191,7 @@
 
 ### Mobile and Accessibility Testing
 
-35. **Mobile Responsiveness**
+52. **Mobile Responsiveness**
    ```typescript
    test.describe('Mobile gameplay', () => {
      test.use({ viewport: { width: 375, height: 667 }});
@@ -159,7 +205,7 @@
    });
    ```
 
-36. **Accessibility Compliance**
+53. **Accessibility Compliance**
    ```typescript
    test('WCAG 2.1 AA compliance', async ({ page }) => {
      // Run axe-core accessibility scans
@@ -171,7 +217,7 @@
 
 ### Data Integrity Testing
 
-37. **Financial Calculation Verification**
+54. **Financial Calculation Verification**
    ```typescript
    test('verify insurance economics calculations', async ({ page }) => {
      // Submit known pricing/product decisions
@@ -182,7 +228,7 @@
    });
    ```
 
-38. **Semester Reset Verification**
+55. **Semester Reset Verification**
    ```typescript
    test('clean semester initialization', async ({ page }) => {
      // Verify all companies start fresh
@@ -194,7 +240,7 @@
 
 ### WebSocket and Real-time Testing
 
-39. **Turn Processing Notifications**
+56. **Turn Processing Notifications**
    ```typescript
    test('real-time updates during turn processing', async ({ page }) => {
      // Submit turn decisions
@@ -207,25 +253,25 @@
 
 ### Testing Best Practices
 
-40. **Test Data Management** - Create factories for test data:
+57. **Test Data Management** - Create factories for test data:
    - Company with specific CEO stats
    - Market conditions (boom/bust/catastrophe)
    - Competitor configurations
    - Semester-specific game configurations
 
-41. **Parallel Test Execution** - Tests should be independent and run in parallel:
+58. **Parallel Test Execution** - Tests should be independent and run in parallel:
    - Each test creates its own game instance
    - No shared state between tests
    - Database transactions rolled back after each test
    - Use test-specific Redis namespaces
 
-42. **Visual Testing Strategy**
+59. **Visual Testing Strategy**
    - Screenshot key interfaces at multiple breakpoints
    - Compare executive office themes for consistency
    - Verify chart/graph rendering accuracy
    - Test loading states and error conditions
 
-43. **Performance Benchmarks** - Set specific targets:
+60. **Performance Benchmarks** - Set specific targets:
    - Page load time < 3 seconds
    - Turn submission response < 500ms
    - Investment portfolio optimization < 2 seconds

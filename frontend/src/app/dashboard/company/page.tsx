@@ -2,8 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
+import { queryKeys, queryCacheConfigs } from '@/lib/query-client';
 import { BuildingOfficeIcon, UserCircleIcon, ChartBarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { ArrowUpIcon, ArrowDownIcon, ArrowRightIcon } from '@heroicons/react/20/solid';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Link from 'next/link';
 
 interface CEO {
@@ -135,8 +137,9 @@ export default function CompanyPage() {
   });
 
   const { data: currentTurn, isLoading: turnLoading } = useQuery({
-    queryKey: ['current-turn'],
+    queryKey: queryKeys.currentTurn(),
     queryFn: () => apiClient.get<CurrentTurn>('/game/current-turn'),
+    ...queryCacheConfigs.realTime, // Real-time data - cache for only 30 seconds
   });
 
   const { data: results, isLoading: resultsLoading } = useQuery({
@@ -440,6 +443,67 @@ export default function CompanyPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Financial Trends Chart */}
+      {results && results.length > 1 && (
+        <div className="bg-white shadow rounded-lg mt-6">
+          <div className="px-6 py-5 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Financial Trends</h2>
+          </div>
+          <div className="p-6">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart 
+                data={results.slice().reverse().map(r => ({
+                  turn: `Turn ${r.turn_number}`,
+                  capital: r.financial_results.ending_capital,
+                  combinedRatio: r.financial_results.combined_ratio,
+                  premiums: r.financial_results.total_premiums,
+                }))}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="turn" />
+                <YAxis yAxisId="left" tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`} />
+                <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => `${value}%`} />
+                <Tooltip 
+                  formatter={(value: any, name: string) => {
+                    if (name === 'Capital' || name === 'Premiums') {
+                      return formatCurrency(value);
+                    }
+                    return `${value.toFixed(1)}%`;
+                  }}
+                />
+                <Legend />
+                <Line 
+                  yAxisId="left" 
+                  type="monotone" 
+                  dataKey="capital" 
+                  stroke="#4f46e5" 
+                  name="Capital" 
+                  strokeWidth={2}
+                />
+                <Line 
+                  yAxisId="left" 
+                  type="monotone" 
+                  dataKey="premiums" 
+                  stroke="#10b981" 
+                  name="Premiums" 
+                  strokeWidth={2}
+                />
+                <Line 
+                  yAxisId="right" 
+                  type="monotone" 
+                  dataKey="combinedRatio" 
+                  stroke="#ef4444" 
+                  name="Combined Ratio" 
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

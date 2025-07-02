@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { queryClient } from '@/lib/query-client';
+import { queryClient, queryKeys, queryCacheConfigs } from '@/lib/query-client';
 import { 
   DocumentCheckIcon, 
   ExclamationTriangleIcon,
@@ -17,6 +17,7 @@ import {
   UserGroupIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface TurnStatus {
   turn_number: number;
@@ -80,13 +81,15 @@ export default function DecisionsPage() {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
 
   const { data: turnStatus, isLoading: isLoadingTurn } = useQuery({
-    queryKey: ['current-turn'],
+    queryKey: queryKeys.currentTurn(),
     queryFn: () => apiClient.get<TurnStatus>('/game/current-turn'),
+    ...queryCacheConfigs.realTime, // Real-time data - cache for only 30 seconds
   });
 
   const { data: currentDecisions, isLoading: isLoadingDecisions } = useQuery({
-    queryKey: ['current-decisions'],
+    queryKey: queryKeys.turnDecisions(),
     queryFn: () => apiClient.get<CurrentDecisions>('/game/decisions/current'),
+    ...queryCacheConfigs.realTime, // Real-time data - cache for only 30 seconds
   });
 
   const { data: expansionOpportunities } = useQuery({
@@ -118,9 +121,13 @@ export default function DecisionsPage() {
       fire_employees: currentDecisions?.decisions?.employees?.fire || [],
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['current-decisions'] });
-      queryClient.invalidateQueries({ queryKey: ['current-turn'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.turnDecisions() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.currentTurn() });
       setShowConfirmModal(false);
+      toast.success('Turn decisions submitted successfully! They will be processed on Monday at midnight.');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || 'Failed to submit turn decisions');
     },
   });
 
