@@ -85,7 +85,7 @@ class ResultsAggregator:
             turn_summary["total_claims"] += final_results.get("total_claims", Decimal("0"))
             turn_summary["total_expenses"] += final_results.get("total_expenses", Decimal("0"))
             turn_summary["total_investment_income"] += final_results.get("investment_income", Decimal("0"))
-                        turn_summary["companies_processed"] += 1
+            turn_summary["companies_processed"] += 1
             
             # Save to database
             await self._save_company_results(session, turn, company, final_results, inv_results)
