@@ -9,10 +9,12 @@ from . import demand_simulation
 from . import claims_simulation
 from . import asset_purchase_simulation
 from . import asset_sale_simulation
+from . import weekly_simulation
 
 __all__ = [
     'demand_simulation',
-    'claims_simulation',
+    'claims_simulation', 
     'asset_purchase_simulation',
-    'asset_sale_simulation'
+    'asset_sale_simulation',
+    'weekly_simulation'
 ]
