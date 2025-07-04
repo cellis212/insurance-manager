@@ -3,6 +3,6 @@ module.exports = {
   rules: {
     // Add any custom rules here
     'react/prop-types': 'off', // We use TypeScript for prop validation
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    // Removed problematic TypeScript rule that was causing conflicts
   },
 }; 

@@ -143,7 +143,7 @@ export default function CreateCompanyPage() {
             <div className="space-y-6">
               <h2 className="text-lg font-medium text-gray-900">Select Academic Background</h2>
               <p className="text-sm text-gray-600">
-                Your CEO's education will provide permanent bonuses to their attributes.
+                Your CEO&apos;s education will provide permanent bonuses to their attributes.
               </p>
 
               <div className="space-y-3">
