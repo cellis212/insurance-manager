@@ -24,8 +24,8 @@ from core.engine import plugin_manager
 
 from simulations.demand_simulation import DemandSimulator, MarketShareAllocator
 from simulations.claims_simulation import FrequencySeverityModel, CatastropheSimulator
-from simulations.asset_purchase_simulation import AssetPurchaseSimulator
-from simulations.asset_sale_simulation import AssetSaleSimulator
+# from simulations.asset_purchase_simulation import AssetPurchaseSimulator  # Not used, commented out
+# from simulations.asset_sale_simulation import AssetSaleSimulator  # Not used, commented out
 
 from .demand_functions import DemandFunctionFactory, DemandInputs
 from .market_simulator import MarketSimulator
