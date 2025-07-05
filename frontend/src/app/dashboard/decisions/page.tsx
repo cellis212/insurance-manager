@@ -238,8 +238,8 @@ export default function DecisionsPage() {
             <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400 mr-3 flex-shrink-0" />
             <div>
               <p className="text-sm text-yellow-700">
-                You haven't made any decisions for this turn. If you don't submit decisions by the deadline, 
-                the system will apply "no change" defaults.
+                You haven&apos;t made any decisions for this turn. If you don&apos;t submit decisions by the deadline, 
+                the system will apply &quot;no change&quot; defaults.
               </p>
             </div>
           </div>
@@ -460,7 +460,7 @@ export default function DecisionsPage() {
               {!hasAnyDecisions && (
                 <div className="bg-yellow-50 rounded-md p-4">
                   <p className="text-sm text-yellow-800">
-                    <strong>Warning:</strong> You haven't made any decisions. Submitting now will apply "no change" defaults for this turn.
+                    <strong>Warning:</strong> You haven&apos;t made any decisions. Submitting now will apply &quot;no change&quot; defaults for this turn.
                   </p>
                 </div>
               )}

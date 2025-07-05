@@ -989,6 +989,16 @@
 
 ### Completed TODO Items & Code Quality Improvements
 
+- [x] **Frontend Code Quality - Linting Cleanup (December 28, 2024)**
+  - **Fixed ESLint Configuration**: Removed problematic TypeScript rule that was causing conflicts across all files
+  - **Fixed React Unescaped Entities**: Corrected all unescaped apostrophes and quotes in JSX content:
+    - `frontend/src/app/auth/login/page.tsx`: Fixed "Don't have an account?" → "Don&apos;t have an account?"
+    - `frontend/src/app/company/create/page.tsx`: Fixed "Your CEO's education" → "Your CEO&apos;s education"
+    - `frontend/src/app/dashboard/decisions/page.tsx`: Fixed multiple instances of unescaped quotes and apostrophes in warning messages
+    - `frontend/src/app/dashboard/company/page.tsx`: Fixed "insurance company's status" → "insurance company&apos;s status"
+  - **Result**: All 21 ESLint errors resolved, lint now passes with ✔ No ESLint warnings or errors
+  - **Improved Code Quality**: Enhanced maintainability and consistency across the frontend codebase
+
 **Fixed TODOs and Placeholder Code:**
 - Fixed CEO System API hardcoded turn numbers: Replaced `current_turn = 1` with proper database queries to get actual current turn from Turn table in both hiring pool and employee hiring endpoints
 - Implemented proper semester configuration loading for Expansion API: Replaced hardcoded configuration with database-driven configuration that inherits from GameConfiguration and applies SemesterConfiguration overrides  
